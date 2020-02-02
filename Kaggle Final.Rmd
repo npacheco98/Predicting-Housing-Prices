@@ -1,0 +1,527 @@
+---
+title: "Kaggle Final"
+author: "Nicolas Pacheco Soliz, 704821096"
+date: "March 24, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+
+kaggledata.yvalues1<-read.csv("HTrainW19Final.csv")
+
+
+kaggledata.yvalues1$YearsOld <- 2019 - kaggledata.yvalues1$YearBuilt 
+
+
+#####IMPUTATIONS ########
+
+
+kaggledata.yvalues1$TotalBsmtSF[which(is.na(kaggledata.yvalues1$TotalBsmtSF))]<- median(kaggledata.yvalues1$TotalBsmtSF, na.rm=TRUE)
+kaggledata.yvalues1$TotalBsmtSF[which(kaggledata.yvalues1$TotalBsmtSF==0)]<- 1e-10
+
+kaggledata.yvalues1$KitchenQual[which(is.na(kaggledata.yvalues1$KitchenQual))]<- "TA"
+
+kaggledata.yvalues1$GarageArea[which(kaggledata.yvalues1$GarageArea==0)]<- 1e-10
+
+kaggledata.yvalues1$BedroomAbvGr[which(is.na(kaggledata.yvalues1$BedroomAbvGr))]<- median(kaggledata.yvalues1$BedroomAbvGr, na.rm=TRUE)
+kaggledata.yvalues1$BedroomAbvGr[which(kaggledata.yvalues1$BedroomAbvGr==0)]<- 1e-10
+
+
+kaggledata.yvalues1$BedroomAbvGr[which(is.na(kaggledata.yvalues1$BedroomAbvGr))]<- median(kaggledata.yvalues1$BedroomAbvGr, na.rm=TRUE)
+kaggledata.yvalues1$BedroomAbvGr[which(kaggledata.yvalues1$BedroomAbvGr==0)]<- 1e-10
+
+
+
+## I replaced some values that were initiallity "Zero" with a small value, since doing this would allow me to do the power transform 
+
+
+############
+
+####Quantifying Values and Creation of New Variables #####
+
+kaggledata.yvalues1$YearsOld <- 2019 - kaggledata.yvalues1$YearBuilt 
+
+#library(dplyr)
+
+neighborhood_averages<-kaggledata.yvalues1 %>% group_by(Neighborhood) %>% summarise(median= median(SalePrice))
+nieghborhood_averages<-kaggledata.yvalues1 %>% group_by(Neighborhood) %>% summarise(median= mean(SalePrice))
+
+
+for(i in 1:2500){
+  if(kaggledata.yvalues1$ExterQual[i] == "Ex"){
+    
+    kaggledata.yvalues1$ExterQual_Num[i] = 5
+  }
+  
+    if(kaggledata.yvalues1$ExterQual[i] == "Gd"){
+    
+    kaggledata.yvalues1$ExterQual_Num[i] = 4
+    }
+  
+    if(kaggledata.yvalues1$ExterQual[i] == "TA"){
+      
+    kaggledata.yvalues1$ExterQual_Num[i] = 3
+    
+    }
+    if(kaggledata.yvalues1$ExterQual[i] == "Fa"){
+    
+    kaggledata.yvalues1$ExterQual_Num[i] = 2
+    }
+    if(kaggledata.yvalues1$ExterQual[i] == "Po"){
+    
+  kaggledata.yvalues1$ExterQual_Num[i] = 1
+  }
+}
+
+for(i in 1:2500){
+  if(kaggledata.yvalues1$KitchenQual[i] == "Ex"){
+    
+    kaggledata.yvalues1$KitchenQual_Num[i] = 5
+  }
+  
+    if(kaggledata.yvalues1$KitchenQual[i] == "Gd"){
+    
+    kaggledata.yvalues1$KitchenQual_Num[i] = 4
+    }
+  
+    if(kaggledata.yvalues1$KitchenQual[i] == "TA"){
+      
+    kaggledata.yvalues1$KitchenQual_Num[i] = 3
+    
+    }
+    if(kaggledata.yvalues1$KitchenQual[i] == "Fa"){
+    
+    kaggledata.yvalues1$KitchenQual_Num[i] = 2
+    }
+    if(kaggledata.yvalues1$KitchenQual[i] == "Po"){
+    
+  kaggledata.yvalues1$KitchenQual_Num[i] = 1
+  }
+}
+
+
+
+
+for(i in 1:2500){
+  if(kaggledata.yvalues1$KitchenQual[i] == "Ex"){
+    
+    kaggledata.yvalues1$KitchenQual_Num[i] = 5
+  }
+  
+    if(kaggledata.yvalues1$KitchenQual[i] == "Gd"){
+    
+    kaggledata.yvalues1$KitchenQual_Num[i] = 4
+    }
+  
+    if(kaggledata.yvalues1$KitchenQual[i] == "TA"){
+      
+    kaggledata.yvalues1$KitchenQual_Num[i] = 3
+    
+    }
+    if(kaggledata.yvalues1$KitchenQual[i] == "Fa"){
+    
+    kaggledata.yvalues1$KitchenQual_Num[i] = 2
+    }
+    if(kaggledata.yvalues1$KitchenQual[i] == "Po"){
+    
+  kaggledata.yvalues1$KitchenQual_Num[i] = 1
+  }
+}
+
+
+
+for(i in 1:25){
+  if(neighborhood_averages$median[i] < 125000){
+    
+    neighborhood_averages$rank[i] <- 1
+  }else if(neighborhood_averages$median[i] < 150000){
+    
+    neighborhood_averages$rank[i] <- 2
+  }else if(neighborhood_averages$median[i] < 175000){
+    
+    neighborhood_averages$rank[i] <- 3
+  }else if(neighborhood_averages$median[i] < 200000){
+    
+    neighborhood_averages$rank[i] <- 4
+  }else if(neighborhood_averages$median[i] < 250000){
+    
+    neighborhood_averages$rank[i] <- 5
+  }else if(neighborhood_averages$median[i] < 275000){
+    
+    neighborhood_averages$rank[i] <- 6
+  }else if(neighborhood_averages$median[i] < 300000){
+    
+    neighborhood_averages$rank[i] <- 7
+  }else {
+    
+    neighborhood_averages$rank[i] <- 8
+  }
+
+}
+
+
+
+for(i in 1:2500){
+  
+  if(kaggledata.yvalues1$Neighborhood[i] == "Blmngtn"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 5
+  }
+    if(kaggledata.yvalues1$Neighborhood[i] == "Blueste"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 2
+    }
+    if(kaggledata.yvalues1$Neighborhood[i] == "BrDale"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 1
+    }
+    if(kaggledata.yvalues1$Neighborhood[i] == "BrkSide"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 1
+    }
+    if(kaggledata.yvalues1$Neighborhood[i] == "ClearCr"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 4
+    }
+    if(kaggledata.yvalues1$Neighborhood[i] == "CollgCr"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 5
+    }
+    if(kaggledata.yvalues1$Neighborhood[i] == "Edwards"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 4
+    }
+    if(kaggledata.yvalues1$Neighborhood[i] == "Gilbert"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 2
+    }
+    if(kaggledata.yvalues1$Neighborhood[i] == "IDOTRR"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 4
+    }
+    if(kaggledata.yvalues1$Neighborhood[i] == "MeadowV"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 1
+    }
+    if(kaggledata.yvalues1$Neighborhood[i] == "Mitchel"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 1
+    }
+    if(kaggledata.yvalues1$Neighborhood[i] == "NAmes"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 3
+    }
+    if(kaggledata.yvalues1$Neighborhood[i] == "NoRidge"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 2
+    }
+    if(kaggledata.yvalues1$Neighborhood[i] == "NPkVill"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 8
+    }
+  if(kaggledata.yvalues1$Neighborhood[i] == "NridgHt"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 3
+    }
+  
+  if(kaggledata.yvalues1$Neighborhood[i] == "NPkVill"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 8
+    }
+  
+  if(kaggledata.yvalues1$Neighborhood[i] == "NRidgeHt"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 4
+    }
+  
+  if(kaggledata.yvalues1$Neighborhood[i] == "NWAmes"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 1
+    }
+  if(kaggledata.yvalues1$Neighborhood[i] == "OldTown"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 2
+    }
+  if(kaggledata.yvalues1$Neighborhood[i] == "Sawyer"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 4
+    }
+  if(kaggledata.yvalues1$Neighborhood[i] == "Somerst"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 5
+    }
+  if(kaggledata.yvalues1$Neighborhood[i] == "StoneBr"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 8
+  }
+  if(kaggledata.yvalues1$Neighborhood[i] == "SWISU"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 2
+    }
+  if(kaggledata.yvalues1$Neighborhood[i] == "Timber"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 6
+    }
+  if(kaggledata.yvalues1$Neighborhood[i] == "Veenker"){
+    kaggledata.yvalues1$neighboor_rank[i] <- 5
+    }
+  
+}
+
+
+############### AN EXPLORATION OF DIFFERENT CATEGORICAL VARIABLEE##############33
+
+##some of the relationships I looked at to decide on my predictors 
+
+boxplot(kaggledata.yvalues1$SalePrice ~ kaggledata.yvalues1$KitchenQual)
+boxplot(kaggledata.yvalues1$SalePrice ~ kaggledata.yvalues1$Street)
+boxplot(kaggledata.yvalues1$SalePrice ~ kaggledata.yvalues1$Neighborhood)
+boxplot(kaggledata.yvalues1$SalePrice ~ kaggledata.yvalues1$neighboor_rank)
+boxplot(kaggledata.yvalues1$SalePrice ~ kaggledata.yvalues1$GarageQual)
+boxplot(kaggledata.yvalues1$SalePrice ~ kaggledata.yvalues1$BsmtQual)
+boxplot(kaggledata.yvalues1$SalePrice ~ kaggledata.yvalues1$Electrical)
+boxplot(kaggledata.yvalues1$SalePrice ~ kaggledata.yvalues1$FullBath)
+
+
+
+
+###########THE FIRST MAIN MODEL(THE ONE I ENDED UP CHOOSING) ########
+
+
+kaggle_regression1_no_interaction <-lm(SalePrice ~  OverallQual+Neighborhood+ GarageArea+KitchenQual+TotalBsmtSF+GrLivArea , data= kaggledata.yvalues1)
+
+vif(kaggle_regression1_no_interaction)
+
+
+
+
+
+kaggle_regression1 <-lm(SalePrice ~  OverallQual*Neighborhood+ GarageArea+KitchenQual+TotalBsmtSF*GrLivArea , data= kaggledata.yvalues1)
+
+
+summary(powerTransform(cbind( kaggledata.yvalues1$SalePrice, kaggledata.yvalues1$OverallQual, kaggledata.yvalues1$GarageArea  , kaggledata.yvalues1$TotalBsmtSF ,kaggledata.yvalues1$GrLivArea) ~ 1),data=kaggledata.yvalues1)
+
+
+
+
+summary(kaggle_regression1)
+
+##Transformations Applied 
+
+tkaggle_regression1<- lm(log(SalePrice) ~  OverallQual*Neighborhood+ I((GarageArea)^.5)+ KitchenQual+TotalBsmtSF*GrLivArea  , data= kaggledata.yvalues1)
+
+
+###THE FINAL MODEL####
+
+summary(tkaggle_regression1)
+
+plot(tkaggle_regression1)
+
+
+
+
+
+######################THE SECOND MODEL #######################
+
+
+kaggle_regression2_No_interaction <-lm(SalePrice ~ LotArea + YearsOld  + neighboor_rank + OverallQual + GarageArea + OverallCond +KitchenQual+ TotalBsmtSF+GrLivArea+X1stFlrSF  + ExterQual_Num  + BedroomAbvGr + LowQualFinSF,  data= kaggledata.yvalues1)
+
+vif(kaggle_regression2_No_interaction)
+
+
+kaggle_regression2 <-lm(SalePrice ~ LotArea + YearsOld  + neighboor_rank + OverallQual + GarageArea + OverallCond +KitchenQual+ TotalBsmtSF*GrLivArea*X1stFlrSF  + ExterQual_Num  + BedroomAbvGr + LowQualFinSF,  data= kaggledata.yvalues1)
+
+summary(kaggle_regression2)
+
+
+###Transformation###
+summary(powerTransform(cbind(kaggledata.yvalues1$SalePrice,  kaggledata.yvalues1$OverallQual,  kaggledata.yvalues1$OverallCond, kaggledata.yvalues1$YearsOld, kaggledata.yvalues1$neighboor_rank, kaggledata.yvalues1$GarageArea, kaggledata.yvalues1$X1stFlrSF,  kaggledata.yvalues1$BedroomAbvGr, kaggledata.yvalues1$TotalBsmtSF, kaggledata.yvalues1$GrLivArea) ~ 1),data=kaggledata.yvalues1)
+
+
+
+
+tkaggle_regression2 <-lm(log(SalePrice) ~ LotArea + I((YearsOld)^.15)  + I((neighboor_rank)^.67) + OverallQual + I((GarageArea)^.5) + OverallCond +KitchenQual+ TotalBsmtSF*GrLivArea*X1stFlrSF   + BedroomAbvGr , data= kaggledata.yvalues1)
+                        
+
+
+summary(tkaggle_regression2)
+
+dim(kaggledata.yvalues1)
+
+
+
+
+
+```
+
+
+
+```{r}
+########UPLOADING THE DATASET ###################
+
+
+
+
+kaggledata.noyvalues<- read.csv("HTestW19Final No Y Values.csv")
+#kaggledata.noyvalues
+
+
+
+
+#########IMPUTATION OF DATA #############3
+
+
+kaggledata.noyvalues$BsmtFinSF1[which(is.na(kaggledata.noyvalues$BsmtFinSF1))]<- median(kaggledata.noyvalues$BsmtFinSF1, na.rm=TRUE)
+
+
+kaggledata.noyvalues$GarageArea[which(is.na(kaggledata.noyvalues$GarageArea))] <- median(kaggledata.noyvalues$GarageArea, na.rm=TRUE)
+
+kaggledata.noyvalues$BsmtUnfSF[which(is.na(kaggledata.noyvalues$BsmtUnfSF))]<- median(kaggledata.noyvalues$BsmtUnfSF, na.rm=TRUE)
+
+kaggledata.noyvalues$TotalBsmtSF[which(is.na(kaggledata.noyvalues$TotalBsmtSF))]<- median(kaggledata.noyvalues$TotalBsmtSF, na.rm=TRUE)
+kaggledata.noyvalues$TotalBsmtSF[which(kaggledata.noyvalues$TotalBsmtSF==0)]<- 1e-10
+
+kaggledata.noyvalues$KitchenQual[which(is.na(kaggledata.noyvalues$KitchenQual))]<- "TA"
+
+
+
+########BUILDING NEW VARIABLES ###############
+kaggledata.noyvalues$YearsOld <- 2019 - kaggledata.noyvalues$YearBuilt
+
+
+for(i in 1:1500){
+  if(kaggledata.noyvalues$ExterQual[i] == "Ex"){
+    
+    kaggledata.noyvalues$ExterQual_Num[i] = 5
+  }
+  
+    if(kaggledata.noyvalues$ExterQual[i] == "Gd"){
+    
+    kaggledata.noyvalues$ExterQual_Num[i] = 4
+    }
+  
+    if(kaggledata.noyvalues$ExterQual[i] == "TA"){
+      
+    kaggledata.noyvalues$ExterQual_Num[i] = 3
+    
+    }
+    if(kaggledata.noyvalues$ExterQual[i] == "Fa"){
+    
+    kaggledata.noyvalues$ExterQual_Num[i] = 2
+    }
+    if(kaggledata.noyvalues$ExterQual[i] == "Po"){
+    
+  kaggledata.noyvalues$ExterQual_Num[i] = 1
+  }
+  
+  
+}
+
+
+
+for(i in 1:1500){
+  
+  if(kaggledata.noyvalues$Neighborhood[i] == "Blmngtn"){
+   kaggledata.noyvalues$neighboor_rank[i] <- 5
+  }
+    if(kaggledata.noyvalues$Neighborhood[i] == "Blueste"){
+    kaggledata.noyvalues$neighboor_rank[i] <- 2
+    }
+    if(kaggledata.noyvalues$Neighborhood[i] == "BrDale"){
+   kaggledata.noyvalues$neighboor_rank[i] <- 1
+    }
+    if(kaggledata.noyvalues$Neighborhood[i] == "BrkSide"){
+  kaggledata.noyvalues$neighboor_rank[i] <- 1
+    }
+    if(kaggledata.noyvalues$Neighborhood[i] == "ClearCr"){
+   kaggledata.noyvalues$neighboor_rank[i] <- 4
+    }
+    if(kaggledata.noyvalues$Neighborhood[i] == "CollgCr"){
+    kaggledata.noyvalues$neighboor_rank[i] <- 5
+    }
+    if(kaggledata.noyvalues$Neighborhood[i] == "Edwards"){
+    kaggledata.noyvalues$neighboor_rank[i] <- 4
+    }
+    if(kaggledata.noyvalues$Neighborhood[i] == "Gilbert"){
+    kaggledata.noyvalues$neighboor_rank[i] <- 2
+    }
+    if(kaggledata.noyvalues$Neighborhood[i] == "IDOTRR"){
+    kaggledata.noyvalues$neighboor_rank[i] <- 4
+    }
+    if(kaggledata.noyvalues$Neighborhood[i] == "MeadowV"){
+    kaggledata.noyvalues$neighboor_rank[i] <- 1
+    }
+    if(kaggledata.noyvalues$Neighborhood[i] == "Mitchel"){
+   kaggledata.noyvalues$neighboor_rank[i] <- 1
+    }
+    if(kaggledata.noyvalues$Neighborhood[i] == "NAmes"){
+   kaggledata.noyvalues$neighboor_rank[i] <- 3
+    }
+    if(kaggledata.noyvalues$Neighborhood[i] == "NoRidge"){
+    kaggledata.noyvalues$neighboor_rank[i] <- 2
+    }
+    if(kaggledata.noyvalues$Neighborhood[i] == "NPkVill"){
+   kaggledata.noyvalues$neighboor_rank[i] <- 8
+    }
+  if(kaggledata.noyvalues$Neighborhood[i] == "NridgHt"){
+    kaggledata.noyvalues$neighboor_rank[i] <- 3
+    }
+  
+  if(kaggledata.noyvalues$Neighborhood[i] == "NPkVill"){
+   kaggledata.noyvalues$neighboor_rank[i] <- 8
+    }
+  
+  if(kaggledata.noyvalues$Neighborhood[i] == "NRidgeHt"){
+     kaggledata.noyvalues$neighboor_rank[i] <- 4
+    }
+  
+  if(kaggledata.noyvalues$Neighborhood[i] == "NWAmes"){
+   kaggledata.noyvalues$neighboor_rank[i] <- 1
+    }
+  if(kaggledata.noyvalues$Neighborhood[i] == "OldTown"){
+   kaggledata.noyvalues$neighboor_rank[i] <- 2
+    }
+  if(kaggledata.noyvalues$Neighborhood[i] == "Sawyer"){
+    kaggledata.noyvalues$neighboor_rank[i] <- 4
+    }
+  if(kaggledata.noyvalues$Neighborhood[i] == "Somerst"){
+   kaggledata.noyvalues$neighboor_rank[i] <- 5
+    }
+  if(kaggledata.noyvalues$Neighborhood[i] == "StoneBr"){
+   kaggledata.noyvalues$neighboor_rank[i] <- 8
+  }
+  if(kaggledata.noyvalues$Neighborhood[i] == "SWISU"){
+    kaggledata.noyvalues$neighboor_rank[i] <- 2
+    }
+  if(kaggledata.noyvalues$Neighborhood[i] == "Timber"){
+    kaggledata.noyvalues$neighboor_rank[i] <- 6
+    }
+  if(kaggledata.noyvalues$Neighborhood[i] == "Veenker"){
+    kaggledata.noyvalues$neighboor_rank[i] <- 5
+    }
+  
+}
+
+
+
+
+######IMPUTATIONS #########
+
+
+kaggledata.noyvalues$BsmtFinSF1[which(is.na(kaggledata.noyvalues$BsmtFinSF1))]<- median(kaggledata.noyvalues$BsmtFinSF1, na.rm=TRUE)
+
+
+kaggledata.noyvalues$GarageArea[which(is.na(kaggledata.noyvalues$GarageArea))] <- median(kaggledata.noyvalues$GarageArea, na.rm=TRUE)
+
+kaggledata.noyvalues$BsmtUnfSF[which(is.na(kaggledata.noyvalues$BsmtUnfSF))]<- median(kaggledata.noyvalues$BsmtUnfSF, na.rm=TRUE)
+
+kaggledata.noyvalues$TotalBsmtSF[which(is.na(kaggledata.noyvalues$TotalBsmtSF))]<- median(kaggledata.noyvalues$TotalBsmtSF, na.rm=TRUE)
+kaggledata.noyvalues$TotalBsmtSF[which(kaggledata.noyvalues$TotalBsmtSF==0)]<- 1e-10
+
+kaggledata.noyvalues$KitchenQual[which(is.na(kaggledata.noyvalues$KitchenQual))]<- "TA"
+
+newpredictedsalesprices<-predict(tkaggle_regression2, newdata=kaggledata.noyvalues)
+summary(newpredictedsalesprices)
+
+
+
+
+
+kaggledata.noyvalues$SalePrice<- newpredictedsalesprices
+
+
+
+df<- as.data.frame(exp(newpredictedsalesprices))
+df
+
+colnames(df)<- "SalePrice"
+
+
+write.csv(df, "submissiontest18.csv")
+
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
